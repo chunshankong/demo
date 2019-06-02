@@ -136,7 +136,7 @@
         <dependency>
             <groupId>org.seleniumhq.selenium</groupId>
             <artifactId>selenium-java</artifactId>
-            <version>3.8.1</version>
+            <version>3.14.0</version>
         </dependency>
 
         <dependency>
@@ -150,6 +150,12 @@
             <version>5.1.36</version>
         </dependency>
 
+        <!-- https://mvnrepository.com/artifact/org.quartz-scheduler/quartz -->
+        <dependency>
+            <groupId>org.quartz-scheduler</groupId>
+            <artifactId>quartz</artifactId>
+            <version>2.3.0</version>
+        </dependency>
 
 
 
@@ -227,18 +233,18 @@
         </pluginManagement>
 
         <resources>
-            <resource>
+         <!--   <resource>
                 <directory>src/main/resources</directory>
-            </resource>
-        <!--    &lt;!&ndash; 拷贝启动配置文件 &ndash;&gt;
+            </resource>-->
+            <!-- 拷贝启动配置文件 -->
             <resource>
                 <directory>src/main/resources/</directory>
                 <targetPath>${project.build.directory}/</targetPath>
             </resource>
             <resource>
-                <directory>src/main/resources/bin/</directory>
-                <targetPath>${project.build.directory}/bin</targetPath>
-            </resource>-->
+                <directory>src/main/resources/driver/</directory>
+                <targetPath>${project.build.directory}/driver</targetPath>
+            </resource>
         </resources>
 
         <plugins>
@@ -259,7 +265,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>script.phase1.Demo</mainClass>
+                            <mainClass>rpa.compensate.Main</mainClass>
                             <addClasspath>true</addClasspath>
                             <classpathPrefix>lib/</classpathPrefix>
                         </manifest>
@@ -268,6 +274,25 @@
                     <classesDirectory>
                     </classesDirectory>
                 </configuration>
+            </plugin>
+            <!-- 拷贝依赖的jar包到lib目录 -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>copy</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>
+                                ${project.build.directory}/lib
+                            </outputDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
 
         </plugins>

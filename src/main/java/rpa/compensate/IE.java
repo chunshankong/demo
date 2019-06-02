@@ -1,18 +1,14 @@
 package rpa.compensate;
 
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
-import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.*;
 import org.openqa.selenium.ie.InternetExplorerDriver;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.support.ui.Select;
 
 import java.io.IOException;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author yangsiguo
@@ -21,12 +17,18 @@ import java.util.Map;
  */
 public class IE {
 
-    private final static String compensatePassword ;
+    private final static String compensatePassword;
+    private static String driverPath;
+
     static {
-        compensatePassword = PropertiesUtil.GetValueByKey("config.properties","compensate-password");
+        compensatePassword = PropertiesUtil.getValueByKey("compensate-password");
+        // ie启动成功,files是启动ie驱动
+        driverPath = PropertiesUtil.class.getClassLoader().getResource("driver/IEDriverServer_Win32_3.14.0/IEDriverServer.exe").getPath();
+        System.out.println(driverPath);
+        System.setProperty("webdriver.ie.driver", driverPath);
     }
 
-    public static void main(String[]args) {
+    public static void main(String[] args) {
 
 //        executeClickJob();
 
@@ -45,90 +47,137 @@ public class IE {
 
     }
 
-    public static boolean modifyPage(Map<String,String> map){
+    public static boolean modifyPage(Map<String, String> map) {
 
         System.out.println("start selenium");
         WebDriver driver = null;
         boolean success = false;
         try {
-            // ie启动成功,files是启动ie驱动
-            System.setProperty("webdriver.ie.driver", "C:\\Users\\yangsiguo\\Desktop\\IEDriverServer_Win32_3.8.0\\IEDriverServer.exe");
+
 //        代码关闭IE一些配置
             DesiredCapabilities dc = DesiredCapabilities.internetExplorer();
             dc.setCapability(InternetExplorerDriver.INTRODUCE_FLAKINESS_BY_IGNORING_SECURITY_DOMAINS, true);
-            dc.setCapability("ignoreProtectedModeSettings", true);
+            dc.setCapability(InternetExplorerDriver.IGNORE_ZOOM_SETTING, true);
 //        把加载关闭配置加载到IE浏览器
             driver = new InternetExplorerDriver(dc);
+            driver.manage().timeouts().implicitlyWait(Integer.valueOf(PropertiesUtil.getValueByKey("driver-wait")), TimeUnit.SECONDS);
 
-            success = modifyPage(driver,map);
 
-        }catch (Throwable e){
+            success = modifyPage(driver, map);
+
+        } catch (Throwable e) {
 
             e.printStackTrace();
             success = false;
-        }finally {
-            driver.close();
-            driver.quit();
+        } finally {
+            try {
+                if (null != driver) {
+                    driver.close();
+                    driver.quit();
+                }
+                Runtime.getRuntime().exec("taskkill /T /F /IM IEDriverServer.exe");
+            } catch (Throwable e) {
+                e.printStackTrace();
+            }
         }
 
-        //update DB
-        if (success){
-            DBService.updateStateById(State.SUCCESS.getValue(),map.get("id"));
-        }else {
-            DBService.updateStateById(State.FAILED.getValue(),map.get("id"));
+        try {
+            //update DB
+            if (success) {
+                DBService.updateStateById(State.SUCCESS.getValue(), map.get("id"));
+            } else {
+                DBService.updateStateById(State.FAILED.getValue(), map.get("id"));
+            }
+        }catch (Throwable e){
+            e.printStackTrace();
+            success = false;
         }
 
         return success;
     }
 
-    private static boolean modifyPage(WebDriver driver,Map<String,String> map){
+    private static boolean modifyPage(WebDriver driver, Map<String, String> map) {
 
         String path = PropertiesUtil.class.getClassLoader().getResource("bailAccountIdModifyPage.html").getPath();
-        path = "file://"+path;
+        path = "file://" + path;
         System.out.println(path);
 
         driver.get(path);
 
-        driver.findElement(By.id("dBtn")).click();
+        WebElement dBtn = driver.findElement(By.id("dBtn"));
+        dBtn.click();
+        dBtn.sendKeys(Keys.ENTER);
 
-        driver.findElement(By.id("seqNo")).sendKeys(map.get("seq_no"));
-        driver.findElement(By.id("productId")).sendKeys(map.get("product_id"));
-        driver.findElement(By.id("sign")).sendKeys(map.get("sign"));
-        driver.findElement(By.id("txTime")).sendKeys(map.get("tx_time"));
+//        driver.findElement(By.id("seqNo")).sendKeys(map.get("seq_no"));
+//        driver.findElement(By.id("productId")).sendKeys(map.get("product_id"));
+//        driver.findElement(By.id("sign")).sendKeys(map.get("sign"));
+//        driver.findElement(By.id("txTime")).sendKeys(map.get("tx_time"));
 
-        driver.findElement(By.id("transBtn")).click();
+        ((JavascriptExecutor)driver).executeScript("document.getElementById(\"seqNo\").value=\""+map.get("seq_no")+"\"");
+        ((JavascriptExecutor)driver).executeScript("document.getElementById(\"productId\").value=\""+map.get("product_id")+"\"");
+        ((JavascriptExecutor)driver).executeScript("document.getElementById(\"sign\").value=\""+map.get("sign")+"\"");
+        ((JavascriptExecutor)driver).executeScript("document.getElementById(\"txTime\").value=\""+map.get("tx_time")+"\"");
 
-        driver.findElement(By.id("pass")).sendKeys(compensatePassword);
-        driver.findElement(By.id("sub")).click();
+        WebElement transBtn = driver.findElement(By.id("transBtn"));
+        transBtn.click();
+        transBtn.sendKeys(Keys.ENTER);
+
+
+//        driver.findElement(By.id("pass")).sendKeys(compensatePassword);
+        ((JavascriptExecutor)driver).executeScript("document.getElementById(\"pass\").value=\""+compensatePassword+"\"");
+
+
+        WebElement sub =driver.findElement(By.id("sub"));
+        sub.click();
+        sub.sendKeys(Keys.ENTER);
 
         return true;
     }
-    public static void executeClickJob(){
+
+    public static void executeClickJob() {
         System.out.println("start selenium");
 
         WebDriver driver = null;
+
         try {
-            // ie启动成功,files是启动ie驱动
-            System.setProperty("webdriver.ie.driver", "C:\\Users\\yangsiguo\\Desktop\\IEDriverServer_Win32_3.8.0\\IEDriverServer.exe");
 //        代码关闭IE一些配置
             DesiredCapabilities dc = DesiredCapabilities.internetExplorer();
             dc.setCapability(InternetExplorerDriver.INTRODUCE_FLAKINESS_BY_IGNORING_SECURITY_DOMAINS, true);
-            dc.setCapability("ignoreProtectedModeSettings", true);
+            dc.setCapability(InternetExplorerDriver.IGNORE_ZOOM_SETTING, true);
 //        把加载关闭配置加载到IE浏览器
             driver = new InternetExplorerDriver(dc);
+            driver.manage().timeouts().implicitlyWait(3, TimeUnit.SECONDS);
 
             executeClickJob(driver);
 
-        }catch (Throwable e){
+        } catch (Throwable e) {
 
             e.printStackTrace();
-        }finally {
-            driver.close();
-            driver.quit();
+        } finally {
+            try {
+                if (null != driver) {
+                    driver.close();
+                    driver.quit();
+                }
+                Runtime.getRuntime().exec("taskkill /T /F /IM IEDriverServer.exe");
+            } catch (Throwable e) {
+                e.printStackTrace();
+            }
         }
 
     }
-    private static void executeClickJob(WebDriver driver){
+
+    private static WebElement findElement(WebDriver driver, By by) {
+        WebElement element = null;
+        try {
+            element = driver.findElement(by);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return element;
+    }
+
+    private static void executeClickJob(WebDriver driver) {
 
 
 //        driver.get("https://www.baidu.com");
@@ -145,56 +194,54 @@ public class IE {
 
         driver.get("http://192.168.0.87:18080/xxl-job-admin/");
 
-
-        List<WebElement> webElements1 =  driver.findElements(By.xpath("//*[@class='fa fa-circle-o text-yellow']"));
-
-        if (webElements1.size() <= 0){
+        WebElement webElements1 = findElement(driver, By.cssSelector("body > div.wrapper > aside > section > ul > li.nav-click.active > a"));
+        if (webElements1 == null) {
             login(driver);
-            webElements1 =    driver.findElements(By.xpath("//*[@class='fa fa-circle-o text-yellow']"));
+            webElements1 = findElement(driver, By.cssSelector("body > div.wrapper > aside > section > ul > li.nav-click.active > a"));
         }
-
-        webElements1.get(0).click();
-
-
+        webElements1.click();
+        webElements1.sendKeys(Keys.ENTER);
 
         //jobGroup
         WebElement d = driver.findElement(By.id("jobGroup"));
         Select s = new Select(d);
         s.selectByValue("2");
 
-
         driver.findElement(By.id("executorHandler")).sendKeys("compensatoryHandler");
 
-        driver.findElement(By.id("searchBtn")).click();
+        WebElement search = driver.findElement(By.id("searchBtn"));
+        search.click();
+        search.sendKeys(Keys.ENTER);
 
-        String compensatoryHandlerSelector = PropertiesUtil.GetValueByKey("config.properties","compensatoryHandler-selector");
+        String compensatoryHandlerSelector = PropertiesUtil.getValueByKey("compensatoryHandler-selector");
         //#\31 3 > button.btn.btn-primary.btn-xs.job_trigger
         WebElement exe = driver.findElement(By.cssSelector(compensatoryHandlerSelector));
         exe.click();
+        exe.sendKeys(Keys.ENTER);
 
-
-        WebElement ok = driver.findElement(By.xpath("//*[@class='btn btn-primary ok']"));
+        WebElement ok = driver.findElement(By.cssSelector("#jobTriggerModal > div > div > div.modal-body > form > div:nth-child(3) > div > button.btn.btn-primary.ok"));
         ok.click();
-
-
-        List<WebElement> select =    driver.findElements(By.xpath("//*[@class='form-control']"));
-
-
-        List<WebElement> webElements2 =    driver.findElements(By.xpath("//*[@class='btn btn-primary btn-xs job_trigger']"));
-
-
-        List<WebElement> webElements  = ((InternetExplorerDriver) driver).findElementsByClassName("fa fa-circle-o text-yellow");
-
-
-
+        ok.sendKeys(Keys.ENTER);
 
 
 //        Runtime.getRuntime().exec("taskkill /T /F /IM IEDriverServer.exe");.
     }
-    private static void login(WebDriver driver){
 
-        List<WebElement> webElements1 =   driver.findElements(By.xpath("//*[@class='btn btn-primary btn-block btn-flat']"));
-        webElements1.get(0).click();
+    private static void login(WebDriver driver) {
+
+        WebElement user = driver.findElement(By.cssSelector("#loginForm > div > div:nth-child(2) > input"));
+        user.clear();
+        user.sendKeys("admin");
+        WebElement psw = driver.findElement(By.cssSelector("#loginForm > div > div:nth-child(3) > input"));
+        psw.clear();
+        psw.sendKeys("123456");
+        WebElement login = driver.findElement(By.cssSelector("#loginForm > div > div.row > div.col-xs-4 > button"));
+        login.click();
+        login.sendKeys(Keys.ENTER);
+
+//        List<WebElement> webElements1 =   driver.findElements(By.xpath("//*[@class='btn btn-primary btn-block btn-flat']"));
+//        webElements1.get(0).click();
+
 
     }
 

@@ -1,15 +1,31 @@
 package rpa.compensate;
 
-import script.phase1.Demo;
-
 import java.io.*;
 import java.util.Enumeration;
 import java.util.Properties;
 
 //关于Properties类常用的操作
 public class PropertiesUtil {
+
+    public static final String filePath = "config.properties";
     //根据Key读取Value
-    public static String GetValueByKey(String filePath, String key) {
+    private static String getValueByKey(String filePath, String key) {
+        Properties pps = new Properties();
+        try {
+            //返回读取指定资源的输入流
+            InputStream is = PropertiesUtil.class.getClassLoader().getResourceAsStream(filePath);
+
+            pps.load(is);
+            String value = pps.getProperty(key);
+            System.out.println(key + " = " + value);
+            return value;
+
+        }catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+    public static String getValueByKey(String key) {
         Properties pps = new Properties();
         try {
             //返回读取指定资源的输入流
@@ -58,7 +74,7 @@ public class PropertiesUtil {
     }
 
     public static void main(String[] args) {
-        String pid = GetValueByKey("config.properties","compensatoryHandler-selector");
+        String pid = getValueByKey("","compensatoryHandler-selector");
         System.out.println(pid);
     }
 

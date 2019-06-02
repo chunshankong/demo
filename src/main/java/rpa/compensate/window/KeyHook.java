@@ -13,7 +13,8 @@ public class KeyHook {
     private static boolean quit;
     private static HHOOK hhk;
     private static LowLevelKeyboardProc keyboardHook;
-    public static void main(String[] args) {
+
+    public static void keyHook(){
         final User32 lib = User32.INSTANCE;
         HMODULE hMod = Kernel32.INSTANCE.GetModuleHandle(null);
         keyboardHook = new LowLevelKeyboardProc() {

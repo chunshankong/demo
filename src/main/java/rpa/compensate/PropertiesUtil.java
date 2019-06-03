@@ -1,82 +1,52 @@
 package rpa.compensate;
 
 import java.io.*;
-import java.util.Enumeration;
 import java.util.Properties;
 
 //关于Properties类常用的操作
 public class PropertiesUtil {
 
-    public static final String filePath = "config.properties";
-    //根据Key读取Value
-    private static String getValueByKey(String filePath, String key) {
-        Properties pps = new Properties();
-        try {
-            //返回读取指定资源的输入流
-            InputStream is = PropertiesUtil.class.getClassLoader().getResourceAsStream(filePath);
-
-            pps.load(is);
-            String value = pps.getProperty(key);
-            System.out.println(key + " = " + value);
-            return value;
-
-        }catch (IOException e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-    public static String getValueByKey(String key) {
-        Properties pps = new Properties();
-        try {
-            //返回读取指定资源的输入流
-            InputStream is = PropertiesUtil.class.getClassLoader().getResourceAsStream(filePath);
-
-            pps.load(is);
-            String value = pps.getProperty(key);
-            System.out.println(key + " = " + value);
-            return value;
-
-        }catch (IOException e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
-    //读取Properties的全部信息
-    public static void GetAllProperties(String filePath) throws IOException {
-        Properties pps = new Properties();
-        InputStream in = new BufferedInputStream(new FileInputStream(filePath));
-        pps.load(in);
-        Enumeration en = pps.propertyNames(); //得到配置文件的名字
-
-        while(en.hasMoreElements()) {
-            String strKey = (String) en.nextElement();
-            String strValue = pps.getProperty(strKey);
-            System.out.println(strKey + "=" + strValue);
-        }
-
-    }
-
-    //写入Properties信息
-    public static void WriteProperties (String filePath, String pKey, String pValue) throws IOException {
-        Properties pps = new Properties();
-
-        InputStream in = new FileInputStream(filePath);
-        //从输入流中读取属性列表（键和元素对）
-        pps.load(in);
-        //调用 Hashtable 的方法 put。使用 getProperty 方法提供并行性。
-        //强制要求为属性的键和值使用字符串。返回值是 Hashtable 调用 put 的结果。
-        OutputStream out = new FileOutputStream(filePath);
-        pps.setProperty(pKey, pValue);
-        //以适合使用 load 方法加载到 Properties 表中的格式，
-        //将此 Properties 表中的属性列表（键和元素对）写入输出流
-        pps.store(out, "Update " + pKey + " name");
+    public static final String filePath ;
+    static {
+        filePath = System.getProperty("user.dir")+File.separator+"config.properties";
     }
 
     public static void main(String[] args) {
-        String pid = getValueByKey("","compensatoryHandler-selector");
-        System.out.println(pid);
+        String path = System.getProperty("user.dir");
+        System.out.println(path);
+        String cron = getValueByKey("cron");
+        System.out.println(cron);
+
+     String   driverPath =
+        System.getProperty("user.dir")+File.separator+"driver"+File.separator+"IEDriverServer_Win32_3.14.0"+File.separator+"IEDriverServer.exe";
+        System.out.println(driverPath);
+
     }
+    public static String getValueByKey(String key){
+        return getProperties(filePath).getProperty(key);
+    }
+
+    private static Properties getProperties(String fileName) {
+        try {
+            System.out.println(fileName);
+            Properties properties = new Properties();
+            InputStream in = new FileInputStream(new File(fileName));
+            properties.load(in);
+            return properties;
+        } catch (IOException e) {
+            System.out.println(e.getMessage());
+            try {
+                Properties properties = new Properties();
+                InputStream in = PropertiesUtil.class.getClassLoader().getResourceAsStream(fileName);//默认加载classpath的
+                properties.load(in);
+                return properties;
+            } catch (IOException es) {
+                System.out.println(es.getMessage());
+                return null;
+            }
+        }
+    }
+
 
 
 }

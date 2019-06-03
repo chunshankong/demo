@@ -28,6 +28,27 @@ public class CompensateJob implements Job {
         Frame.callJobProcessed(processed);
     }
 
+    private static volatile int totalJobCount = 0;//总数
+    private static volatile int jobCount = 0;//当前行数
+
+    public static int getTotalJobCount() {
+        return totalJobCount;
+    }
+
+    public static void setTotalJobCount(int totalJobCount) {
+        CompensateJob.totalJobCount = totalJobCount;
+        Frame.callTotalJobCount(CompensateJob.getTotalJobCount());
+    }
+
+    public static int getJobCount() {
+        return jobCount;
+    }
+
+    public static void setJobCount(int jobCount) {
+        CompensateJob.jobCount = jobCount;
+        Frame.callJobCount(CompensateJob.getJobCount());
+    }
+
     public static void execute() {
 
         try {
@@ -39,13 +60,15 @@ public class CompensateJob implements Job {
             System.out.println("定时任务开始执行");
             CompensateJob.setProcessed(true);
 
-            List<Map<String, String>> list = DBService.getCompensateData(State.DEFAULT.getValue());
+            List<Map<String, String>> list = DBService.getCompensateData(State.FAILED.getValue());
+            CompensateJob.setTotalJobCount(list.size());
             System.out.println(JSON.toJSONString(list));
 
             List<String> successIds = new ArrayList<>();
             List<String> failedIds = new ArrayList<>();
             for (Map<String, String> map : list) {
 
+                CompensateJob.setJobCount(CompensateJob.getJobCount() + 1);
                 boolean success = IE.modifyPage(map);
                 String id = map.get("id");
                 System.out.println(id);

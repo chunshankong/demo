@@ -1,0 +1,155 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>credit2go</title>
+    <script type="text/javascript" src="https://jerp2p.jx-bank.com/escrow/js/jquery-1.4.4.min.js"></script>
+</head>
+<body>
+<form id="myform" method="post" onsubmit="return submit();"
+      action="https://jerp2p.jx-bank.com/escrowll/p2p/page/bailAccountIdModifyPage">
+    <table class="">
+        <tr>
+            <td>版本号-version</td><td> <input type="test" id="version" name="version"></td>
+        </tr>
+        <tr>
+            <td>交易代码-txCode</td><td><input type="test" id="txCode" name="txCode"></td>
+        </tr>
+        <tr>
+            <td>机构代码-instCode</td><td><input type="test" id="instCode" name="instCode"></td>
+        </tr>
+        <tr>
+            <td>银行代码-bankCode</td><td><input type="test" id="bankCode" name="bankCode"></td>
+        </tr>
+        <tr>
+            <td>交易日期-txDate</td><td><input type="test" id="txDate" name="txDate"></td>
+        </tr>
+        <tr>
+            <td>交易时间-txTime</td><td><input type="test" id="txTime" name="txTime"></td>
+        </tr>
+        <tr>
+            <td>交易流水号-seqNo</td><td><input type="test" id="seqNo" name="seqNo"></td>
+        </tr>
+        <tr>
+            <td>交易渠道-channel</td><td><input type="test" id="channel" name="channel"></td>
+        </tr>
+        <tr>
+            <td>请求方保留-acqRes</td><td><input type="test" id="acqRes" name="acqRes"></td>
+        </tr>
+        <tr>
+            <td>标的号-productId</td><td><input type="test" id="productId" name="productId"></td>
+        </tr>
+        <tr>
+            <td>原担保人账号-oldBailAccountId</td><td><input type="test" id="oldBailAccountId" name="oldBailAccountId"></td>
+        </tr>
+        <tr>
+            <td>新担保人账号-newBailAccountIdl</td><td><input type="test" id="newBailAccountId" name="newBailAccountId"></td>
+        </tr>
+        <tr>
+            <td>忘记密码跳转-forgotPwdUrll</td><td><input type="test" id="forgotPwdUrl" name="forgotPwdUrl"></td>
+        </tr>
+        <tr>
+            <td>返回交易页面链接-retUrl</td><td><input type="test" id="retUrl" name="retUrl"></td>
+        </tr>
+        <tr>
+            <td>交易成功跳转链接-successfulUrl</td><td><input type="test" id="successfulUrl" name="successfulUrl"></td>
+        </tr>
+        <tr>
+            <td>后台验证订单有效性连接-verifyOrderNoUrl</td><td><input type="test" id="verifyOrderNoUrl" name="verifyOrderNoUrl"></td>
+        </tr>
+        <tr>
+            <td>后台通知链接-notifyUrl</td><td><input type="test" id="notifyUrl" name="notifyUrl"></td>
+        </tr>
+        <tr>
+            <td>签名-sign</td><td><input type="test" id="sign" name="sign"></td>
+        </tr>
+    </table>
+    <div>
+        <button class="btn" id="dBtn" type="button" onclick="autofill()">一键默认</button>
+        <button class="btn" id="signBtn" type="button">获取签名</button>
+        <button class="btn" id="resetBtn" type="reset">重置参数</button>
+        <button class="btn" id="transBtn" ng-click="indexSubmit()">
+            &nbsp;&nbsp;确认&nbsp;&nbsp;</button>
+    </div>
+</form>
+
+<script>
+    function submit() {
+        document.getElementById('myform').submit();
+    }
+    function autofill() {
+        document.getElementById("version").value = "10";
+        document.getElementById("txCode").value = "bailAccountIdModifyPage";
+        document.getElementById("instCode").value = "01430001";
+        document.getElementById("bankCode").value = "30050000";
+        //document.getElementById("txDate").value = getDate();
+		document.getElementById("txDate").value = "20150507";
+        //document.getElementById("txTime").value = getTims();
+        document.getElementById("txTime").value ="";
+        document.getElementById("seqNo").value = "";
+        document.getElementById("channel").value = "000001";
+        document.getElementById("productId").value = "";
+		//document.getElementById("productId").value = "19020997221970270001";
+        document.getElementById("oldBailAccountId").value = "6212462330000000031";
+        document.getElementById("newBailAccountId").value = "6212462330005310930";
+        document.getElementById("forgotPwdUrl").value = "https://jerp2p.jx-bank.com/escrowll/p2p/page/passwordResetPage";
+        document.getElementById("retUrl").value = "http://www.baidu.com";
+        document.getElementById("verifyOrderNoUrl").value = "";
+        document.getElementById("successfulUrl").value = "http://www.baidu.com";
+        document.getElementById("notifyUrl").value = "http://devtest.credit2go.cn:8888/online2/p2p/page/verify/test";
+    }
+
+    function getDate(){
+        var myDate = new Date();
+        var year = myDate.getFullYear();    //获取完整的年份(4位,1970-????)
+        var month = myDate.getMonth()+1;       //获取当前月份(0-11,0代表1月)
+        var day = myDate.getDate();        //获取当前日(1-31) */
+
+        if(month<10){month="0"+month;}
+        if(day<10){day="0"+day;}
+
+        var date = ""+year + month + day;
+        return date;
+    }
+    function getTims(){
+        var myDate = new Date();
+        var hours = myDate.getHours();       //获取当前小时数(0-23)
+        var minutes = myDate.getMinutes();     //获取当前分钟数(0-59)
+        var seconds = myDate.getSeconds();     //获取当前秒数(0-59)
+
+        if(hours<10){hours="0"+hours;}
+        if(minutes<10){minutes="0"+minutes;}
+        if(seconds<10){seconds="0"+seconds;}
+
+        var tims = ""+hours+minutes+seconds;
+		times="131856"
+        return tims;
+    }
+</script>
+
+<script>
+    $(document).ready(function(){
+        $("#signBtn").click(function(){
+            var data = $("#myform").serializeArray();
+            console.log(data);
+            var formData = {};
+            for(var i in data){
+                formData[data[i]["name"]]=data[i]["value"];
+            }
+            console.log(formData);
+            var url = "https://jerp2psit.jx-bank.com/escrow/p2p/getSign2";
+            $.ajax({
+                url:url,
+                type:'post',
+                dataType:'json',
+                data:formData,
+                success:function(data){
+                    console.log(data);
+                    $("#sign").val(data.SIGN);
+                }
+            });
+        });
+    });
+</script>
+</body>
+</html>

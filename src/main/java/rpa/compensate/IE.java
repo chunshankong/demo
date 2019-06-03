@@ -5,6 +5,7 @@ import org.openqa.selenium.ie.InternetExplorerDriver;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.support.ui.Select;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -23,7 +24,7 @@ public class IE {
     static {
         compensatePassword = PropertiesUtil.getValueByKey("compensate-password");
         // ie启动成功,files是启动ie驱动
-        driverPath = PropertiesUtil.class.getClassLoader().getResource("driver/IEDriverServer_Win32_3.14.0/IEDriverServer.exe").getPath();
+        driverPath = System.getProperty("user.dir")+ File.separator+"driver"+File.separator+"IEDriverServer_Win32_3.14.0"+File.separator+"IEDriverServer.exe";
         System.out.println(driverPath);
         System.setProperty("webdriver.ie.driver", driverPath);
     }
@@ -49,7 +50,7 @@ public class IE {
 
     public static boolean modifyPage(Map<String, String> map) {
 
-        System.out.println("start selenium");
+        System.out.println("start selenium modifyPage");
         WebDriver driver = null;
         boolean success = false;
         try {
@@ -98,7 +99,7 @@ public class IE {
 
     private static boolean modifyPage(WebDriver driver, Map<String, String> map) {
 
-        String path = PropertiesUtil.class.getClassLoader().getResource("bailAccountIdModifyPage.html").getPath();
+        String path =  System.getProperty("user.dir")+File.separator+"bailAccountIdModifyPage.html";
         path = "file://" + path;
         System.out.println(path);
 
@@ -135,7 +136,7 @@ public class IE {
     }
 
     public static void executeClickJob() {
-        System.out.println("start selenium");
+        System.out.println("start selenium executeClickJob");
 
         WebDriver driver = null;
 
@@ -192,14 +193,14 @@ public class IE {
 //        全屏
         driver.manage().window().maximize();
 
-        driver.get("http://192.168.0.87:18080/xxl-job-admin/");
+        driver.get(PropertiesUtil.getValueByKey("job-url"));
 
-        WebElement webElements1 = findElement(driver, By.cssSelector("body > div.wrapper > aside > section > ul > li.nav-click.active > a"));
+        WebElement webElements1 = findElement(driver, By.cssSelector("body > div.wrapper > aside > section > ul > li:nth-child(3) > a"));
         if (webElements1 == null) {
             login(driver);
-            webElements1 = findElement(driver, By.cssSelector("body > div.wrapper > aside > section > ul > li.nav-click.active > a"));
+            webElements1 = findElement(driver, By.cssSelector("body > div.wrapper > aside > section > ul > li:nth-child(3) > a"));
         }
-        webElements1.click();
+//        webElements1.click();
         webElements1.sendKeys(Keys.ENTER);
 
         //jobGroup
@@ -231,12 +232,15 @@ public class IE {
 
         WebElement user = driver.findElement(By.cssSelector("#loginForm > div > div:nth-child(2) > input"));
         user.clear();
-        user.sendKeys("admin");
+        String job_user = PropertiesUtil.getValueByKey("job-user");
+        user.sendKeys(job_user);
+
         WebElement psw = driver.findElement(By.cssSelector("#loginForm > div > div:nth-child(3) > input"));
         psw.clear();
-        psw.sendKeys("123456");
+        String job_psw = PropertiesUtil.getValueByKey("job-psw");
+        psw.sendKeys(job_psw);
         WebElement login = driver.findElement(By.cssSelector("#loginForm > div > div.row > div.col-xs-4 > button"));
-        login.click();
+//        login.click();
         login.sendKeys(Keys.ENTER);
 
 //        List<WebElement> webElements1 =   driver.findElements(By.xpath("//*[@class='btn btn-primary btn-block btn-flat']"));

@@ -4,16 +4,29 @@ import rpa.compensate.CompensateJob;
 
 import java.awt.Color;
 import java.awt.EventQueue;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 import javax.swing.*;
 
 public class Frame {
 
-    private JFrame frame;
+    static {
+        try {
+//            UIManager.setLookAndFeel( UIManager.getCrossPlatformLookAndFeelClassName() );
+            UIManager.setLookAndFeel( UIManager.getSystemLookAndFeelClassName() );
+//            UIManager.setLookAndFeel( "javax.swing.plaf.metal.MetalLookAndFeel" );
+//            UIManager.setLookAndFeel( "com.sun.java.swing.plaf.windows.WindowsLookAndFeel" );
+        } catch ( Exception e ) {
+            e.printStackTrace();
+        }
+    }
+
+    public static JFrame frame;
     private JPasswordField passwordField;
     private boolean isLogin = false;
 
-    private static JLabel jobDesc;
+    private static JLabel jobDesc,jobCount,totalJobCount;
 
     private static JButton ebutton,cbutton;
 
@@ -27,6 +40,41 @@ public class Frame {
             cbutton.setEnabled(true);
             ebutton.setEnabled(true);
         }
+    }
+
+    public static void callJobCount(int jobCount){
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                Frame.jobCount.setText(String.valueOf(jobCount));
+//                frame.repaint();
+            }
+        });
+        EventQueue.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                Frame.jobCount.setText(String.valueOf(jobCount));
+//                frame.repaint();
+            }
+        });
+    }
+
+    public static void callTotalJobCount(int totalJobCount){
+
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                Frame.totalJobCount.setText(String.valueOf(totalJobCount));
+//                frame.repaint();
+            }
+        });
+        EventQueue.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                Frame.totalJobCount.setText(String.valueOf(totalJobCount));
+//                frame.repaint();
+            }
+        });
     }
 
 
@@ -43,7 +91,7 @@ public class Frame {
             public void run() {
                 try {
                     Frame window = new Frame();
-//                    window.frame.setAlwaysOnTop(true);
+                    window.frame.setAlwaysOnTop(true);
                     window.frame.setVisible(true);
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -67,7 +115,8 @@ public class Frame {
         String userPwd = "111";
 
         frame = new JFrame();
-        frame.setBounds(100, 100, 667, 453);
+        frame.setTitle("Robot");
+        frame.setBounds(600, 200, 667, 453);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.getContentPane().setLayout(null);
 
@@ -92,18 +141,68 @@ public class Frame {
         jobDesc.setBounds(499, 200, 40, 23);
         frame.getContentPane().add(jobDesc);
 
+        JLabel label_2_r = new JLabel("本次任务总数：");
+        label_2_r.setBounds(433, 230, 100, 23);
+        frame.getContentPane().add(label_2_r);
+
+        totalJobCount = new JLabel("0");
+        totalJobCount.setForeground(new Color(255, 0, 0));
+        totalJobCount.setBounds(520, 230, 40, 23);
+        frame.getContentPane().add(totalJobCount);
+
+        JLabel label_3_r = new JLabel("当前任务：");
+        label_3_r.setBounds(433, 250, 100, 23);
+        frame.getContentPane().add(label_3_r);
+
+        jobCount = new JLabel("0");
+        jobCount.setForeground(new Color(255, 0, 0));
+        jobCount.setBounds(499, 250, 40, 23);
+        frame.getContentPane().add(jobCount);
+
         ebutton = new JButton("执行代偿修改任务");
         ebutton.setBackground(new Color(255, 255, 255));
         ebutton.setBounds(126, 200, 212, 23);
 //        ebutton.setEnabled(false);
-        ebutton.addActionListener((actionEvent)-> CompensateJob.execute());
+//        ebutton.addActionListener(e -> new Thread(CompensateJob::execute).start());
+
+        ebutton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                new SwingWorker<Void, Void>() {
+                    protected Void doInBackground() {
+                        // 执行耗时的写文件任务
+                        CompensateJob.execute();
+                        return null;
+                    }
+                    protected void done() {
+
+                    }
+                }.execute();
+            }
+        });
+
         frame.getContentPane().add(ebutton);
 
         cbutton = new JButton("点击代偿JOB");
         cbutton.setBackground(new Color(255, 255, 255));
         cbutton.setBounds(126, 250, 212, 23);
 //        cbutton.setEnabled(false);
-        cbutton.addActionListener((actionEvent)-> CompensateJob.executeClickJob());
+//        cbutton.addActionListener((actionEvent)-> CompensateJob.executeClickJob());
+        cbutton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                new SwingWorker<Void, Void>() {
+                    protected Void doInBackground() {
+                        // 执行耗时的写文件任务
+                        CompensateJob.executeClickJob();
+                        return null;
+                    }
+                    protected void done() {
+
+                    }
+                }.execute();
+            }
+        });
+
+
         frame.getContentPane().add(cbutton);
 
 

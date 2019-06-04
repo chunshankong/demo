@@ -22,13 +22,13 @@ import java.util.concurrent.Callable;
 //java jdbc使用SSH隧道连接mysql数据库demo
 public class DBService {
 
-    static String host = "rr-wz94dz2x304y41jn5.mysql.rds.aliyuncs.com";
+   /* static String host = "rr-wz94dz2x304y41jn5.mysql.rds.aliyuncs.com";
     static String user = "readonly";
-    static String psw = "SrEwLnzTH2g";
+    static String psw = "SrEwLnzTH2g";*/
 
-    static String Whost = "rm-wz9w1c6iuh9j73983.mysql.rds.aliyuncs.com";
-    static String Wuser = "dev";
-    static String Wpsw = "dev1024!@#";
+    static String Whost ;
+    static String Wuser ;
+    static String Wpsw ;
 
 
     static String ssh_host = "112.74.161.196";
@@ -47,7 +47,17 @@ public class DBService {
             e.printStackTrace();
         }
 
-        url = "jdbc:mysql://localhost:"+lport+"/loan";
+        if (Main.ROBOT_PROFILES_ENV.getValue().equals(ENV.PRO.getValue())) {
+            url = "jdbc:mysql://localhost:" + lport + "/loan";
+            Whost = "rm-wz9w1c6iuh9j73983.mysql.rds.aliyuncs.com";
+            Wuser = "dev";
+            Wpsw = "dev1024!@#";
+        } else {
+            url = PropertiesUtil.getValueByKey("test-jdbc-url");
+            Wuser = PropertiesUtil.getValueByKey("test-jdbc-user");
+            Wpsw = PropertiesUtil.getValueByKey("test-jdbc-psw");
+        }
+
     }
 
 
@@ -74,12 +84,16 @@ public class DBService {
         Connection conn = null;
         Session sessionSSH = null;
         try{
-            System.out.println(url);
-            System.out.println("connect SSH =============");
 
-            JSch jsch = new JSch();
-            sessionSSH = jsch.getSession(ssh_user, ssh_host, 22);
-            connectSSH(sessionSSH);
+            System.out.println(url);
+            //生产环境才连接SSH
+            if (Main.ROBOT_PROFILES_ENV.getValue().equals(ENV.PRO.getValue())){
+                System.out.println("connect SSH =============");
+
+                JSch jsch = new JSch();
+                sessionSSH = jsch.getSession(ssh_user, ssh_host, 22);
+                connectSSH(sessionSSH);
+            }
 
             //ssh -R 192.168.0.102:5555:192.168.0.101:3306 yunshouhu@192.168.0.102
             //session.setPortForwardingR("192.168.0.102",5555, "192.168.0.101", 3306);
@@ -100,11 +114,11 @@ public class DBService {
         return new ImmutablePair<>(conn,sessionSSH);
     }
 
-    public static void updateStateById(String state,String id){
+    public static void updateStateById(String status,String id){
         Pair<Connection,Session> pair = establishConnection();
         Connection conn = pair.getLeft();
         try{
-            String sql = "update t_compensate_real t set t.state="+state+" where id="+id;
+            String sql = "update t_bid_change_record t set t.status="+status+" where id="+id;
             Statement statement = conn.createStatement();
             int result = statement
                     .executeUpdate(sql);
@@ -131,12 +145,12 @@ public class DBService {
     }
 
 
-    public static List<Map<String,String>> getCompensateData(String state){
+    public static List<Map<String,String>> getCompensateData(String status){
         Pair<Connection,Session> pair = establishConnection();
         Connection conn = pair.getLeft();
         List<Map<String,String>> list = null;
         try{
-            list = getData(conn,state);
+            list = getData(conn,status);
 
         } catch (Throwable t) {
             t.printStackTrace();
@@ -157,17 +171,44 @@ public class DBService {
         }
         return list;
     }
+    public static int getCountByStatus(String status){
+        Pair<Connection,Session> pair = establishConnection();
+        Connection conn = pair.getLeft();
+        int count = 0;
+        try{
+            count = getCountByStatus(conn,status);
+        } catch (Throwable t) {
+            t.printStackTrace();
+            try {
+                conn.close();
+                pair.getRight().disconnect();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        finally {
+            try {
+                conn.close();
+                pair.getRight().disconnect();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return count;
+    }
+
 
     public static void main(String[] args) {
 
 //        updateStateById(State.FAILED.getValue(),"110");
-        List<Map<String,String>> list = getCompensateData(State.FAILED.getValue());
+//        List<Map<String,String>> list = getCompensateData(BidChangeRecordStatus.FAILED.getValue());
+        getCountByStatus(BidChangeRecordStatus.DEFAULT.getValue());
 
 
     }
 
 
-    private static List<Map<String,String>> getData(Connection conn,String state) throws SQLException {
+    private static List<Map<String,String>> getData(Connection conn,String status) throws SQLException {
 
         List<Map<String,String>> list = new ArrayList<>();
 
@@ -175,7 +216,7 @@ public class DBService {
         // 获取所有表名
         Statement statement = conn.createStatement();
         ResultSet resultSet = statement
-                .executeQuery("select * from t_compensate_real t where t.state="+state);
+                .executeQuery("select * from t_bid_change_record t where t.status="+status);
         // 获取列名
         ResultSetMetaData metaData = resultSet.getMetaData();
         for (int i = 0; i < metaData.getColumnCount(); i++) {
@@ -198,6 +239,9 @@ public class DBService {
             map.put("seq_no",resultSet.getString("seq_no"));
             map.put("sign",resultSet.getString("sign"));
             map.put("tx_time",resultSet.getString("tx_time"));
+            map.put("old_bail_account",resultSet.getString("old_bail_account"));
+            map.put("new_bail_account",resultSet.getString("new_bail_account"));
+            map.put("tx_date",resultSet.getString("tx_date"));
             list.add(map);
         }
         System.out.println(list);
@@ -208,5 +252,32 @@ public class DBService {
         conn.close();
         return list;
     }
+
+    private static int getCountByStatus(Connection conn,String status) throws SQLException {
+
+        String sql = null;
+        if (null == status){
+            sql = "select count(*) from t_bid_change_record t";
+        }else {
+           sql = "select count(*) from t_bid_change_record t where t.status="+status;
+        }
+        // 获取所有表名
+        Statement statement = conn.createStatement();
+        ResultSet resultSet = statement
+                .executeQuery(sql);
+
+        int count = 0;
+        // 获取数据
+        while (resultSet.next()) {
+            count = resultSet.getInt(1);
+        }
+        System.out.println("count:"+count);
+
+        resultSet.close();
+        statement.close();
+        conn.close();
+        return count;
+    }
+
 
 }

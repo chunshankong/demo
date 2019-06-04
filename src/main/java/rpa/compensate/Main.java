@@ -12,6 +12,12 @@ import rpa.compensate.window.KeyHook;
  */
 public class Main {
 
+    public static final ENV ROBOT_PROFILES_ENV ;
+    static {
+        ROBOT_PROFILES_ENV = ENV.getByValue(PropertiesUtil.getValueByKey("env"));
+        System.out.println(ROBOT_PROFILES_ENV.getValue());
+    }
+
     public static void main(String[] args) {
 
         Frame.createFrame();

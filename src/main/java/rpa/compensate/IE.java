@@ -85,9 +85,9 @@ public class IE {
         try {
             //update DB
             if (success) {
-                DBService.updateStateById(State.SUCCESS.getValue(), map.get("id"));
+                DBService.updateStateById(BidChangeRecordStatus.SUCCESS.getValue(), map.get("id"));
             } else {
-                DBService.updateStateById(State.FAILED.getValue(), map.get("id"));
+                DBService.updateStateById(BidChangeRecordStatus.FAILED.getValue(), map.get("id"));
             }
         }catch (Throwable e){
             e.printStackTrace();
@@ -99,14 +99,21 @@ public class IE {
 
     private static boolean modifyPage(WebDriver driver, Map<String, String> map) {
 
-        String path =  System.getProperty("user.dir")+File.separator+"bailAccountIdModifyPage.html";
+        String page;
+        if (Main.ROBOT_PROFILES_ENV.getValue().equals(ENV.PRO.getValue())) {
+            page = "bailAccountIdModifyPage.html";
+        } else {
+            page = "bailAccountIdModifyPage-test.html";
+        }
+
+        String path = System.getProperty("user.dir") + File.separator + page;
         path = "file://" + path;
         System.out.println(path);
 
         driver.get(path);
 
         WebElement dBtn = driver.findElement(By.id("dBtn"));
-        dBtn.click();
+//        dBtn.click();
         dBtn.sendKeys(Keys.ENTER);
 
 //        driver.findElement(By.id("seqNo")).sendKeys(map.get("seq_no"));
@@ -118,18 +125,27 @@ public class IE {
         ((JavascriptExecutor)driver).executeScript("document.getElementById(\"productId\").value=\""+map.get("product_id")+"\"");
         ((JavascriptExecutor)driver).executeScript("document.getElementById(\"sign\").value=\""+map.get("sign")+"\"");
         ((JavascriptExecutor)driver).executeScript("document.getElementById(\"txTime\").value=\""+map.get("tx_time")+"\"");
+        ((JavascriptExecutor)driver).executeScript("document.getElementById(\"oldBailAccountId\").value=\""+map.get("old_bail_account")+"\"");
+        ((JavascriptExecutor)driver).executeScript("document.getElementById(\"newBailAccountId\").value=\""+map.get("new_bail_account")+"\"");
+        ((JavascriptExecutor)driver).executeScript("document.getElementById(\"txDate\").value=\""+map.get("tx_date")+"\"");
+
 
         WebElement transBtn = driver.findElement(By.id("transBtn"));
-        transBtn.click();
+//        transBtn.click();
         transBtn.sendKeys(Keys.ENTER);
 
 
-//        driver.findElement(By.id("pass")).sendKeys(compensatePassword);
+       /* try {
+            Thread.sleep(500);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }*/
+        driver.findElement(By.id("pass")).sendKeys(compensatePassword);
         ((JavascriptExecutor)driver).executeScript("document.getElementById(\"pass\").value=\""+compensatePassword+"\"");
 
 
         WebElement sub =driver.findElement(By.id("sub"));
-        sub.click();
+//        sub.click();
         sub.sendKeys(Keys.ENTER);
 
         return true;

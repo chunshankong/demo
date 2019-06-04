@@ -1,12 +1,15 @@
 package rpa.compensate;
 
 import com.alibaba.fastjson.JSON;
+import com.mchange.v1.util.ListUtils;
+import org.apache.commons.collections4.CollectionUtils;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import rpa.compensate.window.Frame;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -60,8 +63,14 @@ public class CompensateJob implements Job {
             System.out.println("定时任务开始执行");
             CompensateJob.setProcessed(true);
 
-            List<Map<String, String>> list = DBService.getCompensateData(State.FAILED.getValue());
+            List<Map<String, String>> list = DBService.getCompensateData(BidChangeRecordStatus.DEFAULT.getValue());
             CompensateJob.setTotalJobCount(list.size());
+            if (CollectionUtils.isEmpty(list)){
+                System.out.println("任务列表为空");
+//                CompensateJob.setProcessed(false);
+//                System.out.println("定时任务执行结束");
+//                return;
+            }
             System.out.println(JSON.toJSONString(list));
 
             List<String> successIds = new ArrayList<>();
@@ -77,8 +86,26 @@ public class CompensateJob implements Job {
             }
 
 
-            //全部修改成功，点击代偿任务
-            executeClickJob();
+            int totalCount = DBService.getCountByStatus(null);
+            int successCount = DBService.getCountByStatus(BidChangeRecordStatus.SUCCESS.getValue());
+            int failedCount = DBService.getCountByStatus(BidChangeRecordStatus.FAILED.getValue());
+            System.out.println("totalCount:"+totalCount+" successCount:"+successCount+" failedCount:"+failedCount);
+
+            if (totalCount == successCount){
+                //全部修改成功，点击代偿任务
+                System.out.println("全部修改成功，点击代偿任务");
+                executeClickJob();
+            }
+
+/*
+            if (failedCount > 0){
+                System.out.println("重新生成签名");
+                CompensateJob.setProcessed(false);
+                System.out.println("定时任务执行结束");
+                execute();
+            }
+*/
+
 
         } catch (Throwable t) {
             t.printStackTrace();

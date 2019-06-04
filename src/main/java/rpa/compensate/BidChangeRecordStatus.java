@@ -7,18 +7,18 @@ import com.alibaba.fastjson.JSON;
  * @date 2019/6/1
  * @desc TODO add description in here
  */
-public enum  State {
+public enum BidChangeRecordStatus {
 
-    DELETE("0","软删除"),
-    DEFAULT("1","默认"),
-    SUCCESS("2","成功"),
-    FAILED("3","失败");
+
+    DEFAULT("0","默认"),
+    SUCCESS("1","成功"),
+    FAILED("2","失败");
 
     private String value;
 
     private String description;
 
-    State(String value, String description) {
+    BidChangeRecordStatus(String value, String description) {
         this.value = value;
         this.description=description;
     }

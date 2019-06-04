@@ -91,7 +91,7 @@ public class Frame {
             public void run() {
                 try {
                     Frame window = new Frame();
-                    window.frame.setAlwaysOnTop(true);
+//                    window.frame.setAlwaysOnTop(true);
                     window.frame.setVisible(true);
                 } catch (Exception e) {
                     e.printStackTrace();

@@ -7,7 +7,7 @@
 </head>
 <body>
 <form id="myform" method="post" onsubmit="return submit();"
-      action="https://jerp2p.jx-bank.com/escrowll/p2p/page/bailAccountIdModifyPage">
+      action="https://jerp2psit.jx-bank.com/escrow/p2p/page/bailAccountIdModifyPage">
     <table class="">
         <tr>
             <td>版本号-version</td><td> <input type="test" id="version" name="version"></td>
@@ -83,13 +83,13 @@
         document.getElementById("instCode").value = "01430001";
         document.getElementById("bankCode").value = "30050000";
         //document.getElementById("txDate").value = getDate();
-		document.getElementById("txDate").value = "";
+        document.getElementById("txDate").value = "";
         //document.getElementById("txTime").value = getTims();
         document.getElementById("txTime").value ="";
         document.getElementById("seqNo").value = "";
         document.getElementById("channel").value = "000001";
         document.getElementById("productId").value = "";
-		//document.getElementById("productId").value = "19020997221970270001";
+        //document.getElementById("productId").value = "19020997221970270001";
         document.getElementById("oldBailAccountId").value = "";
         document.getElementById("newBailAccountId").value = "";
         document.getElementById("forgotPwdUrl").value = "https://jerp2p.jx-bank.com/escrowll/p2p/page/passwordResetPage";
@@ -122,7 +122,7 @@
         if(seconds<10){seconds="0"+seconds;}
 
         var tims = ""+hours+minutes+seconds;
-		times="131856"
+        times="131856"
         return tims;
     }
 </script>

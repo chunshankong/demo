@@ -76,7 +76,7 @@ public class IE {
                     driver.close();
                     driver.quit();
                 }
-                Runtime.getRuntime().exec("taskkill /T /F /IM IEDriverServer.exe");
+//                Runtime.getRuntime().exec("taskkill /T /F /IM IEDriverServer.exe");
             } catch (Throwable e) {
                 e.printStackTrace();
             }
@@ -176,7 +176,7 @@ public class IE {
                     driver.close();
                     driver.quit();
                 }
-                Runtime.getRuntime().exec("taskkill /T /F /IM IEDriverServer.exe");
+//                Runtime.getRuntime().exec("taskkill /T /F /IM IEDriverServer.exe");
             } catch (Throwable e) {
                 e.printStackTrace();
             }

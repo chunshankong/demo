@@ -33,8 +33,8 @@ public class Frame {
     public static void callJobProcessed(boolean processed){
         if (processed) {
             Frame.jobDesc.setText("处理中");
-//            cbutton.setEnabled(false);
-//            ebutton.setEnabled(false);
+            cbutton.setEnabled(false);
+            ebutton.setEnabled(false);
         }else {
             Frame.jobDesc.setText("待处理");
             cbutton.setEnabled(true);
